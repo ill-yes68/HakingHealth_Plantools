@@ -1,5 +1,7 @@
 from ortools.sat.python import cp_model
 import pandas as pd
+import numpy as np
+from itertools import product
 
 class SimpleScheduler:
     def __init__(self, employees, shifts, hours_per_shift):
@@ -8,13 +10,27 @@ class SimpleScheduler:
         self.hours_per_shift = hours_per_shift  # Durée de chaque shift en heures
         self.model = cp_model.CpModel()
         self.shift_assignments = {}
+        self.shift_pref = {}
         self.create_variables()
+        self.create_prefs()
+        self.set_objective()
 
     def create_variables(self):
         # Variables de décision : chaque employé peut travailler un shift ou non
         for employee in self.employees:
             for shift in self.shifts:
                 self.shift_assignments[(employee, shift)] = self.model.NewBoolVar(f'{employee}_{shift}')
+    
+    def create_prefs(self):
+        for employee in self.employees:
+            for shift in self.shifts:
+                self.shift_pref[(employee, shift)] = np.random.randint(1, 50)
+
+    def set_objective(self):
+        # Minimize the sum of preferences for assigned shifts
+        total_pref_expr = sum(self.shift_pref[(employee, shift)] * self.shift_assignments[(employee, shift)]
+                            for employee, shift in product(self.employees, self.shifts))
+        self.model.Minimize(total_pref_expr)
 
     def add_constraints(self):
         # Contrainte 1 : chaque employé peut travailler au plus un shift par jour
@@ -65,10 +81,11 @@ class SimpleScheduler:
                         row.append("-")  # - si non
                 results.append(row)
 
-            # Créer un DataFrame avec les résultats
+            # Créer un DataFrunder consraintame avec les résultats
             df = pd.DataFrame(results, columns=["Employee"] + self.shifts)
 
             # Sauvegarder le DataFrame dans un fichier Excel
+            print(df)
             df.to_excel(filename, index=False)
             print(f"Le planning a été sauvegardé dans le fichier '{filename}'")
         else:
@@ -76,9 +93,12 @@ class SimpleScheduler:
 
 # Exemple d'utilisation
 employees = ['Alice', 'Bob', 'Charlie']
-shifts = ['Lundi matin', 'Lundi après-midi', 'Mardi matin','Mardi après-midi','mercredi matin','mercredi apres-midi','jeudi  matin','jeudi apres-midi','vendredi matin','vendredi apres-midi']
+shifts = ['Lundi matin', 'Lundi après-midi', 'Mardi matin',
+          'Mardi après-midi','mercredi matin','mercredi apres-midi','jeudi  matin',
+          'jeudi apres-midi','vendredi matin','vendredi apres-midi']
 hours_per_shift = 8  # Par exemple, chaque shift dure 8 heures
 
 scheduler = SimpleScheduler(employees, shifts, hours_per_shift)
 scheduler.add_constraints()
 scheduler.solve_and_save('planning_infirmiers.xlsx')
+
