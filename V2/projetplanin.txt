@@ -1,0 +1,73 @@
+																HAKING HEALTH
+AUTOMATISER UN  EMPLOI DU TEMPS
+
+USER STORY : COMMANDE POUR AUTOMATISER UN PLANING 
+
+L'utilisateur gère un pole du CHU de Besancon, il voudrait pouvoir automatiser les planings de service tout en repondantt au contrainte lié à la demandee de main d'oeuvre
+et  en dans le même temps repondre au contrainte lié à  chaque employé ( problème perso,RTT, congé ...).
+
+**Définition du problème**
+
+Vous avez un pool d'infirmiers et devez les planifier pour une période donnée (par exemple, une semaine). Chaque
+infirmier a des contraintes de disponibilité :
+
+* Absences (par exemple, congé, journée de repos)
+* Heures de travail limitées par jour/semaine
+* Dates spécifiques qu'ils ne peuvent pas travailler
+
+PLANING RECURSIF !! Prendre en compte la fin de chaque mois avant de faire un nouveauxx planning .
+
+Objectif : générer un planning qui respecte ces contraintes tout en garantissant que chaque infirmier travaille un
+nombre raisonnable d'heures.
+contrainte service / travail :
+* Article L. 6153-1 : définit les normes de durée de travail pour les professionnels de la santé, y compris les
+infirmiers.
+* Article L. 6153-2 : précise que le temps de travail des infirmiers ne doit pas dépasser 48h heures par semaine ni
+174 heures par mois.
+* Article L. 6153-3 : autorise les employeurs à demander aux infirmiers une période supplémentaire de travail
+égale ou supérieure à 12 heures en cas d'urgence médicale.
+* Article L. 6153-4 : prévoit que les infirmiers doivent disposer d'une période de repos minimum de 11 heures
+entre deux périodes de travail.
+
+**Règlement sur le temps de travail des infirmiers**
+
+* Le décret n° 84-640 du 20 août 1984 fixe les règles pour les périodes de travail supérieures ou égales à 12
+heures.
+* Selon ce règlement, les infirmiers doivent :
+        + disposer d'une période de repos minimum de 11 heures entre deux périodes de travail ;
+        + avoir au moins 30 minutes de pause entre chaque période de travail de plus de 4 heures ;
+        + bénéficier d'un temps de récupération égal à la durée du travail supplémentaire effectué.		
+
+Ce code définit :
+
+1. La période de planning (par exemple, une semaine)
+2. Le pool d'infirmiers avec leurs contraintes de disponibilité (par exemple, absences, heures de travail
+limitées)
+3. Les contraintes (par exemple, absences, maladies)
+
+La fonction `générez_plan` itère sur chaque jour de la période de planning et vérifie la disponibilité de chaque
+infirmier pour ce jour-là. Si un infirmier est disponible et n'a pas atteint son maximum d'heures par jour, il
+affecte cet infirmier au travail pour ce jour.
+
+**Limites**
+
+Ce code est un exemple simple et peut ne pas couvrir tous les scénarios ou cas d'edge. Vous devrez probablement
+ajouter plus de complexité pour gérer :
+
+* Plusieurs horaires par jour
+* Différents types de jours de congé (par exemple, vacance, journée de repos, parental)
+* Conflicts entre disponibilité et demandes d'horaire
+* Algorithmes de planification plus avancés (par exemple, annealing simulée)
+
+**Étapes suivantes**
+
+Pour améliorer ce code, vous pouvez considérer les étapes suivantes :
+
+1. Ajouter plus de complexité pour gérer plusieurs horaires par jour.
+2. Mettre en place un mécanisme de résolution de conflits pour gérer les contraintes en surimposition (par
+exemple, deux infirmiers sont indisponibles le même jour).
+3. Intégrer avec une base de données ou un stockage de fichiers pour stocker et récupérer les données de
+disponibilité des infirmiers.
+4. Utiliser un algorithm de planification qui prend en compte plus de facteurs, tels que les préférences ou les
+compétences des infirmiers.
+
