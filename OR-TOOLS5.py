@@ -7,13 +7,6 @@ from queries import Queries
 from itertools import product
 
 
-# Exemple d'utilisation
-employees = ['Alice', 'Bob', 'Charlie', 'Illyes', 'Jimmy', 'Donatien', 'Fanny']
-
-# Définition des shifts avec des périodes spécifiques (matin, soir, journée, nuit) pour chaque jour du mois
-days_in_month = [f'Jour {i+1}' for i in range(30)]  # Adjust as needed for the month length
-shifts = {day: ['Matin', 'Soir', 'Journee'] for day in days_in_month}
-
 
 class SimpleScheduler:
 
@@ -128,7 +121,7 @@ class SimpleScheduler:
                     assigned_shift = '-'
                     for period in self.shifts[day]:
                         if solver.Value(self.shift_assignments[(employee, day, period)]):
-                            assigned_shift = {'Matin': 'M', 'Journee': 'J', 'Soir': 'S'}.get(period, '-')
+                            assigned_shift = {'Matin': 'M', 'Journée': 'J', 'Soir': 'S'}.get(period, '-')
                     row.append(assigned_shift)
                 results.append(row)
 

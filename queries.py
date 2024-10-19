@@ -61,7 +61,7 @@ class Queries():
         query = """
                 SELECT * FROM Periods
                 """
-        out = self.cursor.execute(query).fetchall()[0]   
+        out = self.cursor.execute(query).fetchall() 
         return tuple(i for i, *_ in out)  
 
 if __name__== '__main__':
