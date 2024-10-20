@@ -29,10 +29,11 @@ class SimpleScheduler:
 
     def create_prefs(self):
         prefs = self.queries.get_prefs()
+        print(len(prefs))
         for employee in self.employees:
             for i, (day, periods) in enumerate(self.shifts.items()):
                 for j, period in enumerate(periods):
-                    self.shift_pref[(employee, day, period)] = prefs[(employee, i * j)]
+                    self.shift_pref[(employee, day, period)] = prefs[(employee, i*len(periods) + j)]
 
     def create_variables(self):
         # Variables de décision : chaque employé peut travailler un shift ou non
