@@ -4,8 +4,6 @@ import numpy as np
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
 from queries import Queries
-from itertools import product
-
 
 
 class SimpleScheduler:
@@ -17,16 +15,24 @@ class SimpleScheduler:
         self.employees = queries.get_employee()
         self.periods = self.queries.get_periods_names()
         self.nperiods, self.nweeks = self.queries.get_constants()
-        days_in_month = [f'Jour {i+1}' for i in range(self.nweeks * 7)] 
-        self.shifts = {day: self.periods[:] for day in days_in_month}
+        self.days_in_month = [f'Jour {i+1}' for i in range(self.nweeks * 7)] 
+        self.shifts = {day: self.periods[:] for day in self.days_in_month}
         self.hours_per_shift = hours_per_shift
         self.model = cp_model.CpModel()
         self.shift_assignments = {}
         self.shift_pref = {}
-        self.create_variables()
         self.create_prefs()
+        self.create_variables()
         self.add_constraints() 
         self.set_objective()
+        
+
+    def create_prefs(self):
+        prefs = self.queries.get_prefs()
+        for employee in self.employees:
+            for i, (day, periods) in enumerate(self.shifts.items()):
+                for j, period in enumerate(periods):
+                    self.shift_pref[(employee, day, period)] = prefs[(employee, i * j)]
 
     def create_variables(self):
         # Variables de décision : chaque employé peut travailler un shift ou non
@@ -34,11 +40,6 @@ class SimpleScheduler:
             for day, periods in self.shifts.items():
                 for period in periods:
                     self.shift_assignments[(employee, day, period)] = self.model.NewBoolVar(f'{employee}_{day}_{period}')
-
-    def create_prefs(self):
-        for employee in self.employees:
-            for day in self.shifts:
-                self.shift_pref[(employee, day)] = np.random.randint(1, 50)
 
     def add_constraints(self):
         # Contrainte 1 : chaque employé peut travailler au plus un shift par jour
@@ -65,21 +66,19 @@ class SimpleScheduler:
                     if rest_day in self.shifts:
                         self.model.Add(sum(self.shift_assignments[(employee, rest_day, period)] for period in self.shifts[rest_day]) <= 1)
 
+
         # Contrainte 5 : périodes de repos minimum de 11 heures entre deux shifts
         for employee in self.employees:
-            for day, periods in self.shifts.items():
-                for i, period1 in enumerate(periods):
-                    for j, period2 in enumerate(periods):
-                        if i < j:  # Pour éviter les conflits directs de shifts
-                            self.model.AddBoolOr([
-                                self.shift_assignments[(employee, day, period1)].Not(),
-                                self.shift_assignments[(employee, day, period2)].Not()
-                            ])
+            for (day1, day2) in zip(self.days_in_month, self.days_in_month[1:]):
+                self.model.Add(
+                    self.shift_assignments[(employee, day1, self.periods[-1])] + self.shift_assignments[(employee, day2, self.periods[0])] <= 1
+                )
+
 
     def set_objective(self):
         # Minimize the sum of preferences for assigned shifts
         total_pref_expr = sum(
-            self.shift_pref[(employee, day)] * self.shift_assignments[(employee, day, period)]
+            self.shift_pref[(employee, day, period)] * self.shift_assignments[(employee, day, period)]
             for employee in self.employees
             for day in self.shifts
             for period in self.shifts[day]
@@ -98,7 +97,7 @@ class SimpleScheduler:
             for day in self.shifts:
                 for period in self.shifts[day]:
                     if solver.Value(self.shift_assignments[(employee, day, period)]):
-                        total_preferences += self.shift_pref[(employee, day)]
+                        total_preferences += self.shift_pref[(employee, day, period)]
         
         print("Total preferences for assigned shifts:", total_preferences)
 

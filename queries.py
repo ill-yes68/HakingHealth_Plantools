@@ -29,7 +29,7 @@ class Queries():
                 SELECT employee, schedule, ponderation FROM Conditions
                 """
         out = self.cursor.execute(query).fetchall()
-        return {(e, s): p for e,s,p in out}
+        return {(int(e), int(s)): p for e,s,p in out}
 
 
     def get_presence(self):
